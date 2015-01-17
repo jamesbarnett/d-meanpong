@@ -1,0 +1,9 @@
+{
+	"name": "d-meanpong",
+	"description": "Simple template for building SDL2 games in D",
+	"copyright": "Copyright © 2014, jbarnett",
+	"authors": ["jbarnett"],
+	"dependencies": {
+    "derelict-sdl2": ">=1.9.1"
+	}
+}
