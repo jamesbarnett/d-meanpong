@@ -2,7 +2,6 @@ module game_state;
 
 enum GameState { 
   splash, 
-  clearSplash,
   help, 
   notReady, 
   playing, 
@@ -10,6 +9,5 @@ enum GameState {
   aiPoint, 
   playerWon, 
   playerLost, 
-  credits, 
-  closing 
+  credits
 };

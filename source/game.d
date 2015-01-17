@@ -19,7 +19,6 @@ import ai_paddle;
 import ball;
 import collision_detection;
 import sounds;
-import timed_tip_message;
 
 class Game
 {
@@ -40,8 +39,6 @@ private:
   int _playerScore = 0;
   int _aiScore = 0;
   static const int MAX_POINTS = 8;
-  bool _showStartTip;
-  TimedTipMessage _startTipMessage;
 
 public:
   this()
@@ -51,7 +48,6 @@ public:
     _player = new PlayerPaddle(_court);
     _ai = new AiPaddle(_court);
     _ball = new Ball(_court);
-    _showStartTip = true;
   }
 
   void run()
@@ -101,6 +97,11 @@ public:
     {
       _player.velocity().y = Paddle.MAX_Y_VELOCITY;
     }
+    
+    if (SDL_KEYDOWN == event.type && SDL_SCANCODE_W == event.key.keysym.scancode)
+    {
+      _player.velocity().y = 0;
+    }
   }
 
   private void update(long ms)
@@ -114,13 +115,9 @@ public:
         {
           if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)
           {
-            _gameState = GameState.clearSplash;
+            _gameState = GameState.playing;
           }
         }
-        break;
-
-      case GameState.clearSplash:
-        _gameState = GameState.playing;
         break;
 
       case GameState.notReady:
@@ -239,24 +236,9 @@ public:
         drawSplash();
         break;
 
-      case GameState.clearSplash:
-        drawBackground();
-        SDL_RenderPresent(_renderer);
-        break;
-
       case GameState.playing:
       case GameState.aiPoint:
       case GameState.playerPoint:
-        if (_showStartTip)
-        {
-          _startTipMessage = new TimedTipMessage(_renderer,
-            _court,
-            "Press A for Up, and D for Down",
-            3000);
-          _showStartTip = false; 
-        }
-
-        _startTipMessage.draw();
         drawPlaying();
         break;
 
@@ -278,7 +260,24 @@ public:
     string path = buildPath("assets", "splash.png");
     SDL_Texture* texture = IMG_LoadTexture(_renderer, toStringz(path));
     SDL_RenderClear(_renderer);
+    
+    immutable char* instructions = "Press A for Up, D for Down, and W to stop";
+    int w, h;
+    SDL_Color white = { 255, 255, 255, 255 };
+    if (0 != TTF_SizeText(_tipFont, instructions, &w, &h))
+    {
+      writeln("instructions failed to get size!");
+    }
+
     SDL_RenderCopy(_renderer, texture, null, null);
+    SDL_Surface* instructionSurface = TTF_RenderText_Solid(_tipFont, instructions, white);
+    SDL_Rect instructionsRect;
+    instructionsRect.x = _court.width() / 2 - w / 2;
+    instructionsRect.y = 3 * _court.height() / 4 - h / 2;
+    instructionsRect.w = w;
+    instructionsRect.h = h;
+    SDL_Texture* instructionsTexture = SDL_CreateTextureFromSurface(_renderer, instructionSurface);
+    SDL_RenderCopy(_renderer, instructionsTexture, null, &instructionsRect);
     SDL_RenderPresent(_renderer);
   }
 
@@ -410,7 +409,6 @@ public:
     _ai.startingPosition();
     _player.startingPosition();
     _gameState = GameState.playing;
-    _showStartTip = true;
   }
 
   private bool initFonts()
