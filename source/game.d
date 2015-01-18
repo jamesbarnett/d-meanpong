@@ -261,23 +261,23 @@ public:
     SDL_Texture* texture = IMG_LoadTexture(_renderer, toStringz(path));
     SDL_RenderClear(_renderer);
     
-    immutable char* instructions = "Press A for Up, D for Down, and W to stop";
+    immutable char* tip = "Press A for Up, D for Down, and W to stop";
     int w, h;
     SDL_Color white = { 255, 255, 255, 255 };
-    if (0 != TTF_SizeText(_tipFont, instructions, &w, &h))
+    if (0 != TTF_SizeText(_tipFont, tip, &w, &h))
     {
-      writeln("instructions failed to get size!");
+      writeln("tip failed to get size!");
     }
 
     SDL_RenderCopy(_renderer, texture, null, null);
-    SDL_Surface* instructionSurface = TTF_RenderText_Solid(_tipFont, instructions, white);
-    SDL_Rect instructionsRect;
-    instructionsRect.x = _court.width() / 2 - w / 2;
-    instructionsRect.y = 3 * _court.height() / 4 - h / 2;
-    instructionsRect.w = w;
-    instructionsRect.h = h;
-    SDL_Texture* instructionsTexture = SDL_CreateTextureFromSurface(_renderer, instructionSurface);
-    SDL_RenderCopy(_renderer, instructionsTexture, null, &instructionsRect);
+    SDL_Surface* tipSurface = TTF_RenderText_Solid(_tipFont, tip, white);
+    SDL_Rect tipRect;
+    tipRect.x = _court.width() / 2 - w / 2;
+    tipRect.y = 3 * _court.height() / 4 - h / 2;
+    tipRect.w = w;
+    tipRect.h = h;
+    SDL_Texture* tipTexture = SDL_CreateTextureFromSurface(_renderer, tipSurface);
+    SDL_RenderCopy(_renderer, tipTexture, null, &tipRect);
     SDL_RenderPresent(_renderer);
   }
 
@@ -367,7 +367,6 @@ public:
     }
 
     SDL_Surface* surface = TTF_RenderText_Solid(_gameOverFont, sz, gameOverColor);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
 
     static SDL_Rect rect;
     rect.x = _court.width() / 2 - w / 2;
@@ -375,10 +374,30 @@ public:
     rect.w = w;
     rect.h = h;
 
+    immutable char* tip = "Press Enter to play again";
+    
+    if (0 != TTF_SizeText(_tipFont, tip, &w, &h))
+    {
+      writeln("tips failed to get size!");
+    }
+
+    SDL_Surface* tipSurface = TTF_RenderText_Solid(_tipFont, tip, gameOverColor);
+
+    static SDL_Rect tipRect;
+    tipRect.x = _court.width() / 2 - w / 2;
+    tipRect.y = 3 * _court.height() / 4 - h / 2;
+    tipRect.w = w;
+    tipRect.h = h;
+    SDL_Texture* tipTexture = SDL_CreateTextureFromSurface(_renderer, tipSurface);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
     SDL_RenderCopy(_renderer, texture, null, &rect);
+    SDL_RenderCopy(_renderer, tipTexture, null, &tipRect);
+
+    SDL_RenderPresent(_renderer);
+    SDL_DestroyTexture(tipTexture);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
-    SDL_RenderPresent(_renderer);
+    SDL_FreeSurface(tipSurface);
   }
 
   private void drawPlayerWon()
